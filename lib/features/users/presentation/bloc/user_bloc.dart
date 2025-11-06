@@ -1,6 +1,7 @@
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:injectable/injectable.dart';
 import '../../../../core/constants/api_constants.dart';
+import '../../../../core/network/network_info.dart';
 import '../../domain/usecases/add_user_usecase.dart';
 import '../../domain/usecases/get_users_usecase.dart';
 import 'user_event.dart';
@@ -10,10 +11,12 @@ import 'user_state.dart';
 class UserBloc extends Bloc<UserEvent, UserState> {
   final GetUsersUseCase getUsersUseCase;
   final AddUserUseCase addUserUseCase;
+  final NetworkInfo networkInfo;
 
   UserBloc({
     required this.getUsersUseCase,
     required this.addUserUseCase,
+    required this.networkInfo,
   }) : super(const UserInitial()) {
     on<LoadUsersEvent>(_onLoadUsers);
     on<LoadMoreUsersEvent>(_onLoadMoreUsers);
@@ -27,6 +30,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
   ) async {
     emit(const UserLoading());
 
+    final isConnected = await networkInfo.isConnected;
+
     final result = await getUsersUseCase(
       page: ApiConstants.defaultPage,
       perPage: ApiConstants.defaultPerPage,
@@ -39,6 +44,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           users: users,
           currentPage: ApiConstants.defaultPage,
           hasMore: users.length >= ApiConstants.defaultPerPage,
+          isOffline: !isConnected,
         ),
       ),
     );
@@ -88,6 +94,8 @@ class UserBloc extends Bloc<UserEvent, UserState> {
     RefreshUsersEvent event,
     Emitter<UserState> emit,
   ) async {
+    final isConnected = await networkInfo.isConnected;
+
     final result = await getUsersUseCase(
       page: ApiConstants.defaultPage,
       perPage: ApiConstants.defaultPerPage,
@@ -107,6 +115,7 @@ class UserBloc extends Bloc<UserEvent, UserState> {
           users: users,
           currentPage: ApiConstants.defaultPage,
           hasMore: users.length >= ApiConstants.defaultPerPage,
+          isOffline: !isConnected,
         ),
       ),
     );

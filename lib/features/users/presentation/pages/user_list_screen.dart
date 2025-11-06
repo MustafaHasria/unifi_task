@@ -6,6 +6,7 @@ import 'package:pull_to_refresh/pull_to_refresh.dart';
 import '../../../../core/di/injection.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_text_styles.dart';
 import '../bloc/user_bloc.dart';
 import '../bloc/user_event.dart';
 import '../bloc/user_state.dart';
@@ -52,8 +53,7 @@ class _UserListScreenContentState extends State<_UserListScreenContent> {
   }
 
   void _onScroll() {
-    if (_scrollController.position.pixels >=
-        _scrollController.position.maxScrollExtent * 0.9) {
+    if (_scrollController.position.pixels >= _scrollController.position.maxScrollExtent * 0.9) {
       context.read<UserBloc>().add(const LoadMoreUsersEvent());
     }
   }
@@ -77,67 +77,96 @@ class _UserListScreenContentState extends State<_UserListScreenContent> {
           ),
         ],
       ),
-      body: BlocConsumer<UserBloc, UserState>(
-        listener: (context, state) {
-          if (state is UserLoaded) {
-            _refreshController.refreshCompleted();
-          } else if (state is UserError) {
-            _refreshController.refreshFailed();
-          }
-        },
-        builder: (context, state) {
-          if (state is UserLoading) {
-            return const LoadingShimmer();
-          }
-
-          if (state is UserError) {
-            return app_widgets.ErrorWidget(
-              message: state.message,
-              onRetry: () {
-                context.read<UserBloc>().add(const LoadUsersEvent());
-              },
-            );
-          }
-
-          if (state is UserLoaded) {
-            if (state.users.isEmpty) {
-              return const EmptyState(
-                message: 'No users found',
-                icon: Icons.people_outline,
-              );
-            }
-
-            return SmartRefresher(
-              controller: _refreshController,
-              onRefresh: _onRefresh,
-              enablePullUp: false,
-              header: WaterDropMaterialHeader(
-                backgroundColor: AppColors.primary,
-                color: Colors.white,
-              ),
-              child: ListView.builder(
-                controller: _scrollController,
-                padding: EdgeInsets.symmetric(vertical: 8.h),
-                itemCount: state.users.length + (state.isLoadingMore ? 1 : 0),
-                itemBuilder: (context, index) {
-                  if (index == state.users.length) {
-                    return Center(
-                      child: Padding(
-                        padding: EdgeInsets.all(16.h),
-                        child: const CircularProgressIndicator(),
+      body: Column(
+        children: [
+          // Offline Banner
+          BlocBuilder<UserBloc, UserState>(
+            buildWhen: (previous, current) =>
+                (previous is UserLoaded && current is UserLoaded) && previous.isOffline != current.isOffline,
+            builder: (context, state) {
+              if (state is UserLoaded && state.isOffline) {
+                return Container(
+                  width: double.infinity,
+                  padding: EdgeInsets.all(12.h),
+                  color: AppColors.warning.withOpacity(0.2),
+                  child: Row(
+                    children: [
+                      Icon(Icons.cloud_off, size: 20.sp, color: AppColors.warning),
+                      SizedBox(width: 8.w),
+                      Expanded(
+                        child: Text(
+                          'Offline Mode - Showing cached data',
+                          style: AppTextStyles.bodySmall.copyWith(
+                            color: AppColors.warning,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                       ),
-                    );
+                    ],
+                  ),
+                );
+              }
+              return const SizedBox.shrink();
+            },
+          ),
+
+          // Main Content
+          Expanded(
+            child: BlocConsumer<UserBloc, UserState>(
+              listener: (context, state) {
+                if (state is UserLoaded) {
+                  _refreshController.refreshCompleted();
+                } else if (state is UserError) {
+                  _refreshController.refreshFailed();
+                }
+              },
+              builder: (context, state) {
+                if (state is UserLoading) {
+                  return const LoadingShimmer();
+                }
+
+                if (state is UserError) {
+                  return app_widgets.ErrorWidget(
+                    message: state.message,
+                    onRetry: () {
+                      context.read<UserBloc>().add(const LoadUsersEvent());
+                    },
+                  );
+                }
+
+                if (state is UserLoaded) {
+                  if (state.users.isEmpty) {
+                    return const EmptyState(message: 'No users found', icon: Icons.people_outline);
                   }
 
-                  final user = state.users[index];
-                  return UserCard(user: user);
-                },
-              ),
-            );
-          }
+                  return SmartRefresher(
+                    controller: _refreshController,
+                    onRefresh: _onRefresh,
+                    enablePullUp: false,
+                    header: WaterDropMaterialHeader(backgroundColor: AppColors.primary, color: Colors.white),
+                    child: ListView.builder(
+                      controller: _scrollController,
+                      padding: EdgeInsets.symmetric(vertical: 8.h),
+                      itemCount: state.users.length + (state.isLoadingMore ? 1 : 0),
+                      itemBuilder: (context, index) {
+                        if (index == state.users.length) {
+                          return Center(
+                            child: Padding(padding: EdgeInsets.all(16.h), child: const CircularProgressIndicator()),
+                          );
+                        }
 
-          return const SizedBox.shrink();
-        },
+                        final user = state.users[index];
+                        return UserCard(user: user);
+                      },
+                    ),
+                  );
+                }
+
+                return const SizedBox.shrink();
+              },
+            ),
+          ),
+        ],
       ),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
@@ -152,4 +181,3 @@ class _UserListScreenContentState extends State<_UserListScreenContent> {
     );
   }
 }
-

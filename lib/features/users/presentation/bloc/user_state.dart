@@ -21,12 +21,14 @@ class UserLoaded extends UserState {
   final int currentPage;
   final bool hasMore;
   final bool isLoadingMore;
+  final bool isOffline;
 
   const UserLoaded({
     required this.users,
     required this.currentPage,
     required this.hasMore,
     this.isLoadingMore = false,
+    this.isOffline = false,
   });
 
   UserLoaded copyWith({
@@ -34,17 +36,19 @@ class UserLoaded extends UserState {
     int? currentPage,
     bool? hasMore,
     bool? isLoadingMore,
+    bool? isOffline,
   }) {
     return UserLoaded(
       users: users ?? this.users,
       currentPage: currentPage ?? this.currentPage,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
+      isOffline: isOffline ?? this.isOffline,
     );
   }
 
   @override
-  List<Object?> get props => [users, currentPage, hasMore, isLoadingMore];
+  List<Object?> get props => [users, currentPage, hasMore, isLoadingMore, isOffline];
 }
 
 class UserError extends UserState {

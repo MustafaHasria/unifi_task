@@ -56,6 +56,13 @@ dependencies:
   # Utilities
   dartz: ^0.10.1
   pull_to_refresh: ^2.0.0
+  
+  # Local Database (SQLite)
+  sqflite: ^2.3.0
+  path: ^1.8.3
+  
+  # Network Connectivity
+  connectivity_plus: ^5.0.2
 
 dev_dependencies:
   flutter_test:

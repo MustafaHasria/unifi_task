@@ -6,6 +6,7 @@ import AVFoundation
 @objc class AppDelegate: FlutterAppDelegate {
   private let STORAGE_CHANNEL = "com.mustafa.hasria.unifi_task/storage"
   private let PERMISSIONS_CHANNEL = "com.mustafa.hasria.unifi_task/permissions"
+  private let TOAST_CHANNEL = "com.mustafa.hasria.unifi_task/toast"
   
   override func application(
     _ application: UIApplication,
@@ -42,6 +43,28 @@ import AVFoundation
       switch call.method {
       case "requestCameraPermission":
         self.requestCameraPermission(result: result)
+      default:
+        result(FlutterMethodNotImplemented)
+      }
+    }
+    
+    // Toast channel
+    let toastChannel = FlutterMethodChannel(
+      name: TOAST_CHANNEL,
+      binaryMessenger: controller.binaryMessenger
+    )
+    toastChannel.setMethodCallHandler { [weak self] (call: FlutterMethodCall, result: @escaping FlutterResult) in
+      guard let self = self else { return }
+      
+      switch call.method {
+      case "showToast":
+        if let args = call.arguments as? [String: Any],
+           let message = args["message"] as? String {
+          self.showAlert(message: message, viewController: controller)
+          result(nil)
+        } else {
+          result(FlutterError(code: "INVALID_ARGUMENT", message: "Message is required", details: nil))
+        }
       default:
         result(FlutterMethodNotImplemented)
       }
@@ -109,6 +132,20 @@ import AVFoundation
       
     @unknown default:
       result("denied")
+    }
+  }
+  
+  private func showAlert(message: String, viewController: UIViewController) {
+    DispatchQueue.main.async {
+      let alert = UIAlertController(
+        title: nil,
+        message: message,
+        preferredStyle: .alert
+      )
+      
+      alert.addAction(UIAlertAction(title: "OK", style: .default, handler: nil))
+      
+      viewController.present(alert, animated: true, completion: nil)
     }
   }
 }

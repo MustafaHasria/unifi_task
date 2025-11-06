@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/di/injection.dart';
+import '../../../../core/services/native_toast_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../bloc/user_bloc.dart';
 import '../bloc/user_event.dart';
@@ -63,6 +64,10 @@ class _AddUserScreenContentState extends State<_AddUserScreenContent> {
       body: BlocConsumer<UserBloc, UserState>(
         listener: (context, state) {
           if (state is UserAdded) {
+            // Show native toast
+            getIt<NativeToastService>().showSuccess('User added successfully!');
+            
+            // Also show Flutter SnackBar
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: const Text('User added successfully!'),
@@ -77,6 +82,10 @@ class _AddUserScreenContentState extends State<_AddUserScreenContent> {
             );
             context.pop(true);
           } else if (state is UserAddError) {
+            // Show native toast
+            getIt<NativeToastService>().showError(state.message);
+            
+            // Also show Flutter SnackBar
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
                 content: Text(state.message),

@@ -1,9 +1,17 @@
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:dio/dio.dart';
 import 'package:injectable/injectable.dart';
 import '../constants/api_constants.dart';
+import '../database/database_helper.dart';
 
 @module
 abstract class DioModule {
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
+  
+  @lazySingleton
+  DatabaseHelper get databaseHelper => DatabaseHelper.instance;
+
   @lazySingleton
   Dio get dio {
     final dio = Dio(

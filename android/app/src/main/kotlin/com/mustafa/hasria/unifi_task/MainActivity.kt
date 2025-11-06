@@ -5,6 +5,7 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.Environment
 import android.os.StatFs
+import android.widget.Toast
 import androidx.annotation.NonNull
 import androidx.core.app.ActivityCompat
 import androidx.core.content.ContextCompat
@@ -15,6 +16,7 @@ import io.flutter.plugin.common.MethodChannel
 class MainActivity : FlutterActivity() {
     private val STORAGE_CHANNEL = "com.mustafa.hasria.unifi_task/storage"
     private val PERMISSIONS_CHANNEL = "com.mustafa.hasria.unifi_task/permissions"
+    private val TOAST_CHANNEL = "com.mustafa.hasria.unifi_task/toast"
     private val CAMERA_PERMISSION_REQUEST_CODE = 100
 
     private var permissionResult: MethodChannel.Result? = null
@@ -52,6 +54,22 @@ class MainActivity : FlutterActivity() {
             when (call.method) {
                 "requestCameraPermission" -> {
                     requestCameraPermission(result)
+                }
+                else -> result.notImplemented()
+            }
+        }
+
+        // Toast channel
+        MethodChannel(
+            flutterEngine.dartExecutor.binaryMessenger,
+            TOAST_CHANNEL
+        ).setMethodCallHandler { call, result ->
+            when (call.method) {
+                "showToast" -> {
+                    val message = call.argument<String>("message") ?: "No message"
+                    val duration = call.argument<String>("duration") ?: "short"
+                    showToast(message, duration)
+                    result.success(null)
                 }
                 else -> result.notImplemented()
             }
@@ -148,6 +166,18 @@ class MainActivity : FlutterActivity() {
             }
             
             permissionResult = null
+        }
+    }
+
+    private fun showToast(message: String, duration: String) {
+        val toastDuration = if (duration == "long") {
+            Toast.LENGTH_LONG
+        } else {
+            Toast.LENGTH_SHORT
+        }
+        
+        runOnUiThread {
+            Toast.makeText(this, message, toastDuration).show()
         }
     }
 }
