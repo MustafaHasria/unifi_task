@@ -13,6 +13,22 @@ class PermissionRepositoryImpl implements PermissionRepository {
   PermissionRepositoryImpl(this.permissionChannelService);
 
   @override
+  Future<Either<Failure, PermissionStatus>> checkCameraPermission() async {
+    try {
+      final status = await permissionChannelService.checkCameraPermission();
+      return Right(status);
+    } on PlatformException catch (e) {
+      return Left(
+        PlatformFailure(
+          e.message ?? 'Failed to check camera permission from platform',
+        ),
+      );
+    } catch (e) {
+      return Left(PlatformFailure('Unexpected error: ${e.toString()}'));
+    }
+  }
+
+  @override
   Future<Either<Failure, PermissionStatus>> requestCameraPermission() async {
     try {
       final status = await permissionChannelService.requestCameraPermission();

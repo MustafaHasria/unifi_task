@@ -11,6 +11,10 @@ class LoadStorageInfoEvent extends DeviceInfoEvent {
   const LoadStorageInfoEvent();
 }
 
+class CheckCameraPermissionEvent extends DeviceInfoEvent {
+  const CheckCameraPermissionEvent();
+}
+
 class RequestCameraPermissionEvent extends DeviceInfoEvent {
   const RequestCameraPermissionEvent();
 }

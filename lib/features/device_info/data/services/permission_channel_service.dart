@@ -9,6 +9,26 @@ class PermissionChannelService {
     AppConstants.permissionsChannelName,
   );
 
+  Future<PermissionStatus> checkCameraPermission() async {
+    try {
+      final result = await _channel.invokeMethod<String>(
+        AppConstants.checkCameraPermissionMethod,
+      );
+
+      if (result == null) {
+        return PermissionStatus.notDetermined;
+      }
+
+      return _parsePermissionStatus(result);
+    } on PlatformException catch (e) {
+      throw PlatformException(
+        code: e.code,
+        message: e.message ?? 'Failed to check camera permission',
+        details: e.details,
+      );
+    }
+  }
+
   Future<PermissionStatus> requestCameraPermission() async {
     try {
       final result = await _channel.invokeMethod<String>(

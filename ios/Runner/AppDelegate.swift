@@ -41,6 +41,8 @@ import AVFoundation
       guard let self = self else { return }
       
       switch call.method {
+      case "checkCameraPermission":
+        self.checkCameraPermission(result: result)
       case "requestCameraPermission":
         self.requestCameraPermission(result: result)
       default:
@@ -103,6 +105,28 @@ import AVFoundation
         message: "Failed to get storage info: \(error.localizedDescription)",
         details: nil
       ))
+    }
+  }
+  
+  private func checkCameraPermission(result: @escaping FlutterResult) {
+    // Just check the current status without requesting
+    let status = AVCaptureDevice.authorizationStatus(for: .video)
+    
+    switch status {
+    case .authorized:
+      result("granted")
+      
+    case .denied:
+      result("denied")
+      
+    case .restricted:
+      result("denied")
+      
+    case .notDetermined:
+      result("notDetermined")
+      
+    @unknown default:
+      result("notDetermined")
     }
   }
   

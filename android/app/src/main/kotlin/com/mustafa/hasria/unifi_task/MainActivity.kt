@@ -52,6 +52,9 @@ class MainActivity : FlutterActivity() {
             PERMISSIONS_CHANNEL
         ).setMethodCallHandler { call, result ->
             when (call.method) {
+                "checkCameraPermission" -> {
+                    checkCameraPermission(result)
+                }
                 "requestCameraPermission" -> {
                     requestCameraPermission(result)
                 }
@@ -104,6 +107,21 @@ class MainActivity : FlutterActivity() {
             "totalSpace" to totalSpace,
             "freeSpace" to freeSpace
         )
+    }
+
+    private fun checkCameraPermission(result: MethodChannel.Result) {
+        // Just check the current permission status without requesting
+        when {
+            ContextCompat.checkSelfPermission(
+                this,
+                Manifest.permission.CAMERA
+            ) == PackageManager.PERMISSION_GRANTED -> {
+                result.success("granted")
+            }
+            else -> {
+                result.success("notDetermined")
+            }
+        }
     }
 
     private fun requestCameraPermission(result: MethodChannel.Result) {

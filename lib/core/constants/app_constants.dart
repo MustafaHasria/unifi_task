@@ -6,6 +6,7 @@ class AppConstants {
   
   // Method Names
   static const String getStorageInfoMethod = 'getStorageInfo';
+  static const String checkCameraPermissionMethod = 'checkCameraPermission';
   static const String requestCameraPermissionMethod = 'requestCameraPermission';
   static const String showToastMethod = 'showToast';
   

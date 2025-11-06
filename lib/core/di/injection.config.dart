@@ -26,6 +26,8 @@ import '../../features/device_info/domain/repositories/device_info_repository.da
     as _i65;
 import '../../features/device_info/domain/repositories/permission_repository.dart'
     as _i842;
+import '../../features/device_info/domain/usecases/check_camera_permission_usecase.dart'
+    as _i488;
 import '../../features/device_info/domain/usecases/get_storage_info_usecase.dart'
     as _i980;
 import '../../features/device_info/domain/usecases/request_camera_permission_usecase.dart'
@@ -101,9 +103,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i842.PermissionRepository>(),
       ),
     );
+    gh.factory<_i488.CheckCameraPermissionUseCase>(
+      () =>
+          _i488.CheckCameraPermissionUseCase(gh<_i842.PermissionRepository>()),
+    );
     gh.factory<_i62.DeviceInfoBloc>(
       () => _i62.DeviceInfoBloc(
         getStorageInfoUseCase: gh<_i980.GetStorageInfoUseCase>(),
+        checkCameraPermissionUseCase: gh<_i488.CheckCameraPermissionUseCase>(),
         requestCameraPermissionUseCase:
             gh<_i714.RequestCameraPermissionUseCase>(),
       ),
